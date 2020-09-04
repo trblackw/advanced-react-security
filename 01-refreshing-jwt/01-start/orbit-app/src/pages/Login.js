@@ -9,7 +9,7 @@ import FormSuccess from './../components/FormSuccess';
 import FormError from './../components/FormError';
 import GradientBar from './../components/common/GradientBar';
 import { AuthContext } from '../context/AuthContext';
-import { publicFetch } from './../util/fetch';
+import { publicFetch } from '../util/fetch';
 import { Redirect } from 'react-router-dom';
 import GradientButton from '../components/common/GradientButton';
 import logo from './../images/logo.png';
@@ -77,8 +77,8 @@ const Login = () => {
 
               <Formik
                 initialValues={{
-                  email: '',
-                  password: ''
+                  email: 'jimmy@carter.com',
+                  password: 'password'
                 }}
                 onSubmit={values =>
                   submitCredentials(values)
