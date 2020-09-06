@@ -5,6 +5,7 @@ const cors = require('cors');
 const jwt = require('express-jwt');
 const jwtDecode = require('jwt-decode');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 
 const dashboardData = require('./data/dashboard');
 const User = require('./data/User');
@@ -23,6 +24,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 const saveRefreshToken = async (refreshToken, userId) => {
     try {
@@ -36,6 +38,34 @@ const saveRefreshToken = async (refreshToken, userId) => {
         return error;
     }
 }
+
+app.get('/api/token/refresh', async (req, res) => {
+    try {
+        const {refreshToken} = req.cookies;
+        if (!refreshToken) {
+            return res.status(401).json({message: 'missing refresh token'})
+        }
+        const userFromToken = await Token.findOne({
+            refreshToken
+        }).select('user');
+        if (!userFromToken) {
+            res.status(401).json({message: 'error finding user'})
+        }
+        const user = await User.findOne({
+            _id: userFromToken.user
+        })
+        if (!user) {
+            res.status(401).json({message: 'error finding user'})
+        }
+
+        const token = createToken(user);
+        return res.status(200).json({token})
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({message: 'something went wrong'})
+    }
+    ;
+})
 
 app.post('/api/authenticate', async (req, res) => {
     try {
