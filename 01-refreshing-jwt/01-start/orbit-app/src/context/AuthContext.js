@@ -1,12 +1,12 @@
 import React, { createContext, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { publicFetch} from "../util/fetch";
 
 const AuthContext = createContext();
 const { Provider } = AuthContext;
 
 const AuthProvider = ({ children }) => {
   const history = useHistory();
-
   const token = localStorage.getItem('token');
   const userInfo = localStorage.getItem('userInfo');
   const expiresAt = localStorage.getItem('expiresAt');
@@ -53,6 +53,16 @@ const AuthProvider = ({ children }) => {
     return authState.userInfo.role === 'admin';
   };
 
+  const getNewToken = async () => {
+    try {
+      const { data } = await publicFetch.get('/token/refresh');
+      setAuthState(prev => ({ ...prev, token: data.token }))
+    } catch (error) {
+      console.error(error)
+      return error;
+    }
+  }
+
   return (
     <Provider
       value={{
@@ -60,6 +70,7 @@ const AuthProvider = ({ children }) => {
         setAuthState: authInfo => setAuthInfo(authInfo),
         logout,
         isAuthenticated,
+        getNewToken,
         isAdmin
       }}
     >
